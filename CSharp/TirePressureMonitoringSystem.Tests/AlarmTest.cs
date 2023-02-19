@@ -1,4 +1,5 @@
 using Moq;
+using Shouldly;
 using Xunit;
 
 namespace TDDMicroExercises.TirePressureMonitoringSystem
@@ -18,7 +19,7 @@ namespace TDDMicroExercises.TirePressureMonitoringSystem
             _sensor.Setup(x => x.PopNextPressurePsiValue()).Returns(Alarm.LowPressureThreshold + 1);
             var alarm = new Alarm(_sensor.Object);
             alarm.Check();
-            Assert.False(alarm.AlarmOn);
+            alarm.AlarmOn.ShouldBeFalse();
         }
 
         [Theory]
@@ -34,7 +35,7 @@ namespace TDDMicroExercises.TirePressureMonitoringSystem
             alarm.Check();
             
             // Assert
-            Assert.True(alarm.AlarmOn);
+            alarm.AlarmOn.ShouldBeTrue();
         }
 
         [Fact]
@@ -54,7 +55,7 @@ namespace TDDMicroExercises.TirePressureMonitoringSystem
             alarm.Check();
 
             // Assert
-            Assert.True(alarm.AlarmOn);
+            alarm.AlarmOn.ShouldBeTrue();
         }
     }
 }
