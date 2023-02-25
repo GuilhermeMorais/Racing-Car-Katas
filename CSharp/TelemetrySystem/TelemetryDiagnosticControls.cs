@@ -7,40 +7,43 @@ namespace TDDMicroExercises.TelemetrySystem
     {
         private const string DiagnosticChannelConnectionString = "*111#";
         
-        private readonly TelemetryClient _telemetryClient;
-        private string _diagnosticInfo = string.Empty;
+        private readonly ITelemetryClient _telemetryClient;
 
         public TelemetryDiagnosticControls()
         {
             _telemetryClient = new TelemetryClient();
         }
 
-        public string DiagnosticInfo
+        public TelemetryDiagnosticControls(ITelemetryClient telemetryClient)
         {
-            get { return _diagnosticInfo; }
-            set { _diagnosticInfo = value; }
+            _telemetryClient = telemetryClient;
         }
+
+        public string DiagnosticInfo { get; set; }
 
         public void CheckTransmission()
         {
-            _diagnosticInfo = string.Empty;
+            DiagnosticInfo = string.Empty;
+            OpenConnection();
+            _telemetryClient.Send(TelemetryClient.DiagnosticMessage);
+            DiagnosticInfo = _telemetryClient.Receive();
+        }
 
+        private void OpenConnection()
+        {
             _telemetryClient.Disconnect();
-
+            
             int retryLeft = 3;
             while (_telemetryClient.OnlineStatus == false && retryLeft > 0)
             {
                 _telemetryClient.Connect(DiagnosticChannelConnectionString);
                 retryLeft -= 1;
             }
-             
-            if(_telemetryClient.OnlineStatus == false)
+
+            if (_telemetryClient.OnlineStatus == false)
             {
                 throw new Exception("Unable to connect.");
             }
-
-            _telemetryClient.Send(TelemetryClient.DiagnosticMessage);
-            _diagnosticInfo = _telemetryClient.Receive();
         }
     }
 }
